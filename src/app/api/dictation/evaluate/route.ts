@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import connectDB from "@/lib/db";
 import DictationSession from "@/models/DictationSession";
 import UserSettings from "@/models/UserSettings";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const MODEL_NAME = "gemini-2.5-flash";
@@ -50,10 +52,14 @@ export async function POST(req: Request) {
 
         // Persistence
         await connectDB();
-        const settings = await UserSettings.findOne({ userId: 'default' });
+        const sessionAuth = await getServerSession(authOptions);
+        const userId = sessionAuth?.user?.id || "default";
+
+        const settings = await UserSettings.findOne({ userId });
         const level = settings?.aiLevel || "B2";
 
         const session = await DictationSession.create({
+            userId,
             targetText,
             userTranscription,
             accuracyScore: data.score,

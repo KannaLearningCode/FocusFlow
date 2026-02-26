@@ -2,6 +2,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IExplainerHistory extends Document {
+    userId: string; // Added for auth
     query: string;
     answer: string;
     level: string;
@@ -9,6 +10,7 @@ export interface IExplainerHistory extends Document {
 }
 
 const ExplainerHistorySchema: Schema = new Schema({
+    userId: { type: String, required: true, index: true, default: 'default' },
     query: { type: String, required: true },
     answer: { type: String, required: true },
     level: { type: String, required: true },

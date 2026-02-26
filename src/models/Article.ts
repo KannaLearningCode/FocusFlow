@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from "mongoose";
 
 export interface IArticle {
     _id?: string;
+    userId: string; // Added for auth
     title: string;
     content: string;
     readingTime: string; // Changed from reading_time to readingTime to match schema
@@ -29,6 +30,7 @@ export interface IArticle {
 }
 
 const ArticleSchema = new Schema<IArticle>({
+    userId: { type: String, required: true, index: true, default: 'default' },
     title: { type: String, required: true },
     content: { type: String, required: true },
     readingTime: { type: String, required: true },

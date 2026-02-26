@@ -1,6 +1,7 @@
 import mongoose, { Schema, Model } from "mongoose";
 
 export interface IVocabulary {
+    userId: string; // Added for auth
     word: string;
     wordClass: string;
     ipa?: string;
@@ -20,6 +21,7 @@ export interface IVocabulary {
 }
 
 const VocabularySchema = new Schema<IVocabulary>({
+    userId: { type: String, required: true, index: true, default: 'default' },
     word: { type: String, required: true, index: true },
     wordClass: { type: String, default: 'unknown' },
     ipa: { type: String },

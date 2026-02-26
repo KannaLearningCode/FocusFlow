@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import UserSettings from "@/models/UserSettings";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET() {
     try {
         await connectDB();
-        const settings = await UserSettings.findOne({ userId: 'default' });
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
+        const settings = await UserSettings.findOne({ userId });
 
         if (!settings) {
             return NextResponse.json({ aiLevel: "B2" });
@@ -20,6 +25,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
         const { aiLevel } = await req.json();
         if (!aiLevel) {
             return NextResponse.json({ error: "aiLevel is required" }, { status: 400 });
@@ -27,7 +35,7 @@ export async function POST(req: Request) {
 
         await connectDB();
         const settings = await UserSettings.findOneAndUpdate(
-            { userId: 'default' },
+            { userId },
             { aiLevel },
             { upsert: true, new: true }
         );

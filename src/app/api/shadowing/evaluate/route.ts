@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import ShadowingSession from "@/models/ShadowingSession";
 import UserSettings from "@/models/UserSettings";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -67,10 +69,14 @@ export async function POST(req: Request) {
 
         // Persistence
         await connectDB();
-        const settings = await UserSettings.findOne({ userId: 'default' });
+        const sessionAuth = await getServerSession(authOptions);
+        const userId = sessionAuth?.user?.id || "default";
+
+        const settings = await UserSettings.findOne({ userId });
         const level = settings?.aiLevel || "B2";
 
         const session = await ShadowingSession.create({
+            userId,
             targetText,
             userTranscription: analysis.user_transcription,
             accuracyScore: analysis.accuracy_score,

@@ -12,7 +12,7 @@ export interface IUpgradedSentence extends Document {
 
 const UpgradedSentenceSchema = new Schema<IUpgradedSentence>(
     {
-        userId: { type: String, default: "default" },
+        userId: { type: String, required: true, index: true, default: "default" },
         originalSentence: { type: String, required: true },
         upgradedSentence: { type: String, required: true },
         style: { type: String, required: true },

@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     description: "Master English with hyper-focus tools.",
 };
 
+import { NextAuthProvider } from "@/components/auth/NextAuthProvider";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -21,13 +23,15 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-background text-foreground`}>
-                <LevelProvider>
-                    <VocabularyProvider>
-                        <ToastProvider>
-                            {children}
-                        </ToastProvider>
-                    </VocabularyProvider>
-                </LevelProvider>
+                <NextAuthProvider>
+                    <LevelProvider>
+                        <VocabularyProvider>
+                            <ToastProvider>
+                                {children}
+                            </ToastProvider>
+                        </VocabularyProvider>
+                    </LevelProvider>
+                </NextAuthProvider>
             </body>
         </html>
     );

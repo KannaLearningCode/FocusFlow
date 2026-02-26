@@ -3,23 +3,26 @@ import connectDB from "@/lib/db";
 import UserProgress from "@/models/UserProgress";
 import Vocabulary from "@/models/Vocabulary";
 import UpgradedSentence from "@/models/UpgradedSentence";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET() {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
 
-        let progress = await UserProgress.findOne({ userId: 'default' });
+        let progress = await UserProgress.findOne({ userId });
         if (!progress) {
-            progress = await UserProgress.create({ userId: 'default' });
+            progress = await UserProgress.create({ userId });
         }
 
-        // Calculate Words Mastered (assume SRS level > 4 is mastered)
-        // Calculate Words Mastered (assume SRS level > 4 is mastered)
-        const wordsMastered = await Vocabulary.countDocuments({ srsLevel: { $gte: 4 } });
+        // Calculate Words Mastered for THIS USER
+        const wordsMastered = await Vocabulary.countDocuments({ userId, srsLevel: { $gte: 4 } });
 
-        // Upgraded Sentences Stats
-        const upgradedSentencesCount = await UpgradedSentence.countDocuments({ userId: 'default' });
-        const latestUpgradedSentence = await UpgradedSentence.findOne({ userId: 'default' }).sort({ createdAt: -1 });
+        // Upgraded Sentences Stats for THIS USER
+        const upgradedSentencesCount = await UpgradedSentence.countDocuments({ userId });
+        const latestUpgradedSentence = await UpgradedSentence.findOne({ userId }).sort({ createdAt: -1 });
 
         return NextResponse.json({
             ...progress.toObject(),

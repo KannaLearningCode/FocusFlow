@@ -1,5 +1,7 @@
-import { LayoutDashboard, Mic, BookOpen, Layers, Podcast, Book, Sparkles, PenTool, PanelLeftClose, PanelLeftOpen, Headphones, Settings2 } from "lucide-react";
+import { LayoutDashboard, Mic, BookOpen, Layers, Podcast, Book, Sparkles, PenTool, PanelLeftClose, PanelLeftOpen, Headphones, Settings2, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession, signOut } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export type View = "dashboard" | "shadowing" | "upgrader" | "vocabulary" | "phonetic" | "reading" | "writing" | "dictation" | "settings";
 
@@ -11,6 +13,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeView, setActiveView, isCollapsed, toggleSidebar }: SidebarProps) {
+    const { data: session } = useSession();
+
     const navItems = [
         { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { id: "reading", icon: Book, label: "Reading Lounge" },
@@ -64,23 +68,53 @@ export function Sidebar({ activeView, setActiveView, isCollapsed, toggleSidebar 
                 })}
             </nav>
 
-            <div className="p-4 border-t border-border/50">
-                <button
-                    onClick={toggleSidebar}
-                    className={cn(
-                        "w-full flex items-center rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200",
-                        isCollapsed ? "justify-center px-2 py-3" : "gap-3 px-4 py-3"
+            <div className="p-4 border-t border-border/50 bg-secondary/5">
+                <div className={cn("flex items-center gap-3 mb-4", isCollapsed ? "justify-center" : "px-2")}>
+                    <Avatar className="w-8 h-8 border border-white/10">
+                        <AvatarImage src={session?.user?.image || ""} />
+                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {session?.user?.name?.[0] || <UserIcon className="w-4 h-4" />}
+                        </AvatarFallback>
+                    </Avatar>
+                    {!isCollapsed && (
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{session?.user?.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+                        </div>
                     )}
-                >
-                    {isCollapsed ? (
-                        <PanelLeftOpen className="w-5 h-5" />
-                    ) : (
-                        <>
-                            <PanelLeftClose className="w-5 h-5" />
-                            <span>Collapse Sidebar</span>
-                        </>
-                    )}
-                </button>
+                </div>
+
+                <div className="space-y-1">
+                    <button
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        className={cn(
+                            "w-full flex items-center rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-all duration-200",
+                            isCollapsed ? "justify-center px-2 py-3" : "gap-3 px-4 py-3"
+                        )}
+                        title={isCollapsed ? "Log Out" : undefined}
+                    >
+                        <LogOut className="w-5 h-5" />
+                        {!isCollapsed && <span>Log Out</span>}
+                    </button>
+
+                    <button
+                        onClick={toggleSidebar}
+                        className={cn(
+                            "w-full flex items-center rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200",
+                            isCollapsed ? "justify-center px-2 py-3" : "gap-3 px-4 py-3"
+                        )}
+                        title={isCollapsed ? "Expand" : undefined}
+                    >
+                        {isCollapsed ? (
+                            <PanelLeftOpen className="w-5 h-5" />
+                        ) : (
+                            <>
+                                <PanelLeftClose className="w-5 h-5" />
+                                <span>Collapse Sidebar</span>
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </aside>
     );

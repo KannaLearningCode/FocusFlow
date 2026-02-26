@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from "mongoose";
 
 export interface IDictationSession {
     _id?: string;
+    userId: string; // Added for auth
     targetText: string;
     userTranscription: string;
     accuracyScore: number;
@@ -16,6 +17,7 @@ export interface IDictationSession {
 }
 
 const DictationSessionSchema = new Schema<IDictationSession>({
+    userId: { type: String, required: true, index: true, default: 'default' },
     targetText: { type: String, required: true },
     userTranscription: { type: String, required: true },
     accuracyScore: { type: Number, required: true },

@@ -1,52 +1,62 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Vocabulary from "@/models/Vocabulary";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // GET: Fetch all vocabulary
 export async function GET() {
     try {
         await connectDB();
-        let words = await Vocabulary.find({}).sort({ createdAt: -1 });
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
 
-        // Auto-seed if empty
+        let words = await Vocabulary.find({ userId }).sort({ createdAt: -1 });
+
+        // Auto-seed if empty for this specific user
         if (words.length === 0) {
             const seedWords = [
                 {
+                    userId,
                     word: "Analytical",
                     wordClass: "adjective",
                     definition: "Relating to or using analysis or logical reasoning.",
                     ipa: "/ˌan.əˈlɪt.ɪ.kəl/",
                     collocations: ["analytical skills", "analytical approach"],
                     example: "She has a very analytical mind.",
-                    srsLevel: 0
+                    srsLevel: 0,
+                    box: 0
                 },
                 {
+                    userId,
                     word: "Substantial",
                     wordClass: "adjective",
                     definition: "Of considerable importance, size, or worth.",
                     ipa: "/səbˈstan.ʃəl/",
                     collocations: ["substantial amount", "substantial difference"],
                     example: "A substantial amount of money.",
-                    srsLevel: 0
+                    srsLevel: 0,
+                    box: 0
                 },
                 {
+                    userId,
                     word: "Pragmatic",
                     wordClass: "adjective",
                     definition: "Dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations.",
                     ipa: "/pragˈmat.ɪk/",
                     collocations: ["pragmatic approach", "pragmatic solution"],
                     example: "We need a pragmatic solution to this problem.",
-                    srsLevel: 0
+                    srsLevel: 0,
+                    box: 0
                 }
             ];
             await Vocabulary.insertMany(seedWords);
-            words = await Vocabulary.find({}).sort({ createdAt: -1 }); // Re-fetch
+            words = await Vocabulary.find({ userId }).sort({ createdAt: -1 }); // Re-fetch
         }
 
         return NextResponse.json(words);
     } catch (e: any) {
         console.error("Fetch Vocab Error:", e);
-        // Ensure JSON response even on error
         return NextResponse.json({ error: e.message || "Failed to fetch vocabulary" }, { status: 500 });
     }
 }
@@ -55,15 +65,21 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
         const body = await req.json();
 
-        // Basic duplicate check
-        const exists = await Vocabulary.findOne({ word: { $regex: new RegExp(`^${body.word}$`, "i") } });
+        // Basic duplicate check for this user
+        const exists = await Vocabulary.findOne({
+            userId,
+            word: { $regex: new RegExp(`^${body.word}$`, "i") }
+        });
+
         if (exists) {
             return NextResponse.json({ error: "Word already exists" }, { status: 409 });
         }
 
-        const newWord = await Vocabulary.create(body);
+        const newWord = await Vocabulary.create({ ...body, userId });
         return NextResponse.json(newWord);
     } catch (e: any) {
         console.error("Add Word Error:", e);
@@ -75,11 +91,23 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
         const { _id, ...updates } = await req.json();
 
         if (!_id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-        const updatedWord = await Vocabulary.findByIdAndUpdate(_id, updates, { new: true });
+        // Ensure user owns this word
+        const updatedWord = await Vocabulary.findOneAndUpdate(
+            { _id, userId },
+            updates,
+            { new: true }
+        );
+
+        if (!updatedWord) {
+            return NextResponse.json({ error: "Word not found or unauthorized" }, { status: 404 });
+        }
+
         return NextResponse.json(updatedWord);
     } catch (e: any) {
         console.error("Update Word Error:", e);
@@ -91,12 +119,19 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
 
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-        await Vocabulary.findByIdAndDelete(id);
+        const deleted = await Vocabulary.findOneAndDelete({ _id: id, userId });
+
+        if (!deleted) {
+            return NextResponse.json({ error: "Word not found or unauthorized" }, { status: 404 });
+        }
+
         return NextResponse.json({ success: true });
     } catch (e: any) {
         console.error("Delete Word Error:", e);
