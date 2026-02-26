@@ -3,13 +3,18 @@ import { NextResponse } from "next/server";
 import { getCEFRPrompt } from "@/lib/cefr";
 import connectDB from "@/lib/db";
 import ExplainerHistory from "@/models/ExplainerHistory";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function GET(req: Request) {
     try {
         await connectDB();
-        const history = await ExplainerHistory.find().sort({ createdAt: -1 }).limit(20);
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
+        const history = await ExplainerHistory.find({ userId }).sort({ createdAt: -1 }).limit(20);
         return NextResponse.json(history);
     } catch (e) {
         console.error("Dashboard Explain History Error", e);
@@ -20,6 +25,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
         const { text, level } = await req.json();
 
         if (!text) return NextResponse.json({ error: "Text is required" }, { status: 400 });
@@ -46,6 +54,7 @@ export async function POST(req: Request) {
 
         // Save to history
         await ExplainerHistory.create({
+            userId,
             query: text,
             answer,
             level: level || "B2"

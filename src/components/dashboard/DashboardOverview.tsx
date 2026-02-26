@@ -25,10 +25,15 @@ export function DashboardOverview() {
             const res = await fetch("/api/dashboard/explain");
             if (res.ok) {
                 const data = await res.json();
-                setHistory(data);
+                if (Array.isArray(data)) {
+                    setHistory(data);
+                } else {
+                    setHistory([]);
+                }
             }
         } catch (e) {
             console.error("Failed to load history", e);
+            setHistory([]);
         }
     };
 

@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import UserProgress from "@/models/UserProgress";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
         const { score, total, topic } = await req.json();
 
-        // Find default user (or authenticated user later)
-        let prog = await UserProgress.findOne({ userId: 'default' });
+        let prog = await UserProgress.findOne({ userId });
         if (!prog) {
-            prog = await UserProgress.create({ userId: 'default' });
+            prog = await UserProgress.create({ userId });
         }
 
         // Add to history
@@ -21,7 +25,6 @@ export async function POST(req: Request) {
             topic
         });
 
-        // Optionally update other stats if needed, but quizHistory is enough for now
         await prog.save();
 
         return NextResponse.json({ success: true, history: prog.quizHistory });

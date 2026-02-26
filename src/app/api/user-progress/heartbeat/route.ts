@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import UserProgress from "@/models/UserProgress";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST() {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
 
-        let progress = await UserProgress.findOne({ userId: "default" });
+        let progress = await UserProgress.findOne({ userId });
         if (!progress) {
-            progress = await UserProgress.create({ userId: "default", streak: 1, studyMinutes: 0 });
+            progress = await UserProgress.create({ userId, streak: 1, studyMinutes: 0 });
         }
 
         const now = new Date();

@@ -71,7 +71,7 @@ export function Sidebar({ activeView, setActiveView, isCollapsed, toggleSidebar 
             <div className="p-4 border-t border-border/50 bg-secondary/5">
                 <div className={cn("flex items-center gap-3 mb-4", isCollapsed ? "justify-center" : "px-2")}>
                     <Avatar className="w-8 h-8 border border-white/10">
-                        <AvatarImage src={session?.user?.image || ""} />
+                        {session?.user?.image && <AvatarImage src={session.user.image} />}
                         <AvatarFallback className="bg-primary/20 text-primary text-xs">
                             {session?.user?.name?.[0] || <UserIcon className="w-4 h-4" />}
                         </AvatarFallback>

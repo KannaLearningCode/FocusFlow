@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import UpgradedSentence from "@/models/UpgradedSentence";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
         const body = await req.json();
         const { originalSentence, upgradedSentence, style, level, explanation } = body;
 
@@ -12,8 +17,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        // Duplicate Check
+        // Duplicate Check for this user
         const existing = await UpgradedSentence.findOne({
+            userId,
             originalSentence,
             upgradedSentence
         });
@@ -23,6 +29,7 @@ export async function POST(req: Request) {
         }
 
         const newEntry = await UpgradedSentence.create({
+            userId,
             originalSentence,
             upgradedSentence,
             style,
@@ -40,8 +47,10 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
     try {
         await connectDB();
-        // Simple fetch recent
-        const history = await UpgradedSentence.find().sort({ createdAt: -1 }).limit(20);
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
+        const history = await UpgradedSentence.find({ userId }).sort({ createdAt: -1 }).limit(20);
         return NextResponse.json(history);
     } catch (error) {
         console.error("Error fetching history:", error);
@@ -52,12 +61,20 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
 
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-        await UpgradedSentence.findByIdAndDelete(id);
+        const deleted = await UpgradedSentence.findOneAndDelete({ _id: id, userId });
+
+        if (!deleted) {
+            return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
+        }
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error("Error deleting entry:", error);

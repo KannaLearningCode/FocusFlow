@@ -44,6 +44,11 @@ export function VocabularyProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         try {
             const res = await fetch("/api/vocabulary");
+            if (!res.ok) {
+                console.warn("Vocabulary API returned non-ok status:", res.status);
+                setVocabulary([]);
+                return;
+            }
             const data = await res.json();
 
             if (Array.isArray(data)) {
