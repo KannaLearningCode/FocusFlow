@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
+type ToastVariant = "default" | "destructive" | "success" | "info";
 type ToastType = "success" | "error" | "info";
 
 interface Toast {
@@ -11,6 +12,7 @@ interface Toast {
     title: string;
     description?: string;
     type?: ToastType;
+    variant?: ToastVariant;
 }
 
 interface ToastContextType {
@@ -22,9 +24,13 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const toast = useCallback(({ title, description, type = "info" }: Omit<Toast, "id">) => {
+    const toast = useCallback(({ title, description, type, variant = "default" }: Omit<Toast, "id">) => {
         const id = Math.random().toString(36).substring(2, 9);
-        setToasts((prev) => [...prev, { id, title, description, type }]);
+
+        // Map variant to type if type is not provided
+        const finalType = type || (variant === "destructive" ? "error" : variant === "success" ? "success" : "info");
+
+        setToasts((prev) => [...prev, { id, title, description, type: finalType as ToastType, variant }]);
         setTimeout(() => removeToast(id), 3000);
     }, []);
 

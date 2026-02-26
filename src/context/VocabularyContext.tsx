@@ -10,13 +10,16 @@ export interface VocabularyItem {
     ipa?: string;
     definition: string;
     collocations?: string[];
+    verbCollocations?: string[];
+    synonyms?: string[];
+    antonyms?: string[];
     example?: string;
     meaningVN?: string;
     category?: string;
     srsLevel: number;
     nextReview: Date;
     createdAt?: Date;
-    box?: number;
+    box: number; // Made required
     type?: 'word' | 'phrase' | 'sentence';
     grammarNote?: string;
 }
