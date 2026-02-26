@@ -1,0 +1,29 @@
+import mongoose, { Schema, Model } from "mongoose";
+
+export interface IShadowingSession {
+    _id?: string;
+    targetText: string;
+    userTranscription: string;
+    accuracyScore: number;
+    prosodyFeedback: string;
+    cefrLevel: string;
+    createdAt: Date;
+}
+
+const ShadowingSessionSchema = new Schema<IShadowingSession>({
+    targetText: { type: String, required: true },
+    userTranscription: { type: String, required: true },
+    accuracyScore: { type: Number, required: true },
+    prosodyFeedback: { type: String, required: true },
+    cefrLevel: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// Prevent stale model compilation in development
+if (process.env.NODE_ENV === 'development') {
+    delete mongoose.models.ShadowingSession;
+}
+
+const ShadowingSession: Model<IShadowingSession> = mongoose.models.ShadowingSession || mongoose.model("ShadowingSession", ShadowingSessionSchema);
+
+export default ShadowingSession;
