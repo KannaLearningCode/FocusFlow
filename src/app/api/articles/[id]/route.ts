@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Article from "@/models/Article";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+// Định nghĩa kiểu dữ liệu đồng nhất cho params
+type RouteContext = {
+    params: Promise<{ id: string }>
+};
+
+export async function PATCH(req: Request, { params }: RouteContext) {
     try {
         await connectDB();
-        const { id } = params;
+        // Cần await params ở đây
+        const { id } = await params; 
         const { highlights } = await req.json();
 
         if (!id) {
@@ -31,7 +37,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 export async function GET(
     request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: RouteContext
 ) {
     try {
         await connectDB();
@@ -56,7 +62,7 @@ export async function GET(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: RouteContext
 ) {
     try {
         await connectDB();
