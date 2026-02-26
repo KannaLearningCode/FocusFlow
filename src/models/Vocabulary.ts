@@ -7,6 +7,7 @@ export interface IVocabulary {
     ipa?: string;
     definition: string;
     collocations?: string[];
+    verbCollocations?: string[]; // Added
     example?: string;
     meaningVN?: string;
     synonyms?: string[];
@@ -27,6 +28,7 @@ const VocabularySchema = new Schema<IVocabulary>({
     ipa: { type: String },
     definition: { type: String, required: true },
     collocations: [{ type: String }],
+    verbCollocations: [{ type: String }], // Added
     example: { type: String },
     meaningVN: { type: String },
     synonyms: [{ type: String }],

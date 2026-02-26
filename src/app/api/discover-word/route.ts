@@ -2,18 +2,23 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Vocabulary from "@/models/Vocabulary";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
     try {
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
         const { text, category, level } = await req.json();
 
         // 1. Fetch recent words to avoid (Randomization) - Only for Generation Mode
         let promptExclusions = "";
         if (!text) {
-            const recentWords = await Vocabulary.find({ category: category || "General" }).sort({ createdAt: -1 }).limit(20).select("word");
+            const recentWords = await Vocabulary.find({ userId, category: category || "General" }).sort({ createdAt: -1 }).limit(20).select("word");
             const avoidList = recentWords.map(w => w.word).join(", ");
             if (avoidList) promptExclusions = `Avoid these words: ${avoidList}.`;
         }
@@ -36,6 +41,7 @@ export async function POST(req: Request) {
                 "example": "sentence...",
                 "meaningVN": "Vietnamese meaning...",
                 "collocations": ["col1", "col2"],
+                "verbCollocations": ["vcol1", "vcol2"],
                 "synonyms": ["syn1", "syn2"],
                 "antonyms": ["ant1", "ant2"]
             }
@@ -54,6 +60,7 @@ export async function POST(req: Request) {
                 "example": "sentence...",
                 "meaningVN": "Vietnamese meaning...",
                 "collocations": ["col1", "col2"],
+                "verbCollocations": ["vcol1", "vcol2"],
                 "synonyms": ["syn1", "syn2"],
                 "antonyms": ["ant1", "ant2"]
             }
@@ -75,22 +82,17 @@ export async function POST(req: Request) {
         // 2. Duplicate Check & Auto-Save
         // Normalize word for check
         const normalizedWord = data.word.trim();
-        const existing = await Vocabulary.findOne({ word: { $regex: new RegExp(`^${normalizedWord}$`, "i") } });
+        const existing = await Vocabulary.findOne({
+            userId,
+            word: { $regex: new RegExp(`^${normalizedWord}$`, "i") }
+        });
 
         if (existing) {
-            // If already exists, we return the existing one, or arguably update it. 
-            // For now, let's return the AI data but NOT save a duplicate, 
-            // OR return the existing DB data? 
-            // The user said: "Fix Duplication: Add a check to ensure the same word isn't saved twice."
-            // If it's "Discovery" (random), getting a duplicate is bad luck. 
-            // If it's "Analysis", it's fine, we just show it.
-            // Let's just return the data with a flag or just return it. 
-            // But if it's NOT saved, it won't be in the list? 
-            // Actually, if it exists, it IS in the list.
             return NextResponse.json({ ...data, isDuplicate: true });
         } else {
             // Save new word
             const newWord = await Vocabulary.create({
+                userId,
                 word: data.word,
                 wordClass: data.wordClass,
                 definition: data.definition,
@@ -98,6 +100,7 @@ export async function POST(req: Request) {
                 example: data.example,
                 meaningVN: data.meaningVN,
                 collocations: data.collocations || [],
+                verbCollocations: data.verbCollocations || [],
                 synonyms: data.synonyms || [],
                 antonyms: data.antonyms || [],
                 category: category || "General",

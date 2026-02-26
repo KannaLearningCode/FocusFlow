@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Article from "@/models/Article";
 import { getCEFRPrompt } from "@/lib/cefr";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -15,9 +17,11 @@ export async function POST(req: Request) {
         }
 
         await connectDB();
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
 
-        // 1. Fetch recent titles to avoid repetition (Randomization Logic)
-        const recentArticles = await Article.find().sort({ createdAt: -1 }).limit(10).select("title");
+        // 1. Fetch recent titles (filtered by user)
+        const recentArticles = await Article.find({ userId }).sort({ createdAt: -1 }).limit(10).select("title");
         const avoidTitles = recentArticles.map(a => a.title).join(", ");
 
         const model = genAI.getGenerativeModel({
@@ -64,9 +68,10 @@ export async function POST(req: Request) {
 
         // 2. Auto-save to MongoDB
         const newArticle = await Article.create({
+            userId,
             title: articleData.title,
             content: articleData.content,
-            readingTime: articleData.reading_time, // Map snake_case from AI to camelCase model
+            readingTime: articleData.reading_time,
             difficulty_level: articleData.difficulty_level,
             topic: topic
         });
@@ -82,7 +87,10 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
     try {
         await connectDB();
-        const articles = await Article.find().sort({ createdAt: -1 });
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || "default";
+
+        const articles = await Article.find({ userId }).sort({ createdAt: -1 });
         return NextResponse.json(articles);
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
