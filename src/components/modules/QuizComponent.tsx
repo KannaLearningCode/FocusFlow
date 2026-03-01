@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, ArrowRight, Award, RotateCw, BookOpen, Brain } from "lucide-react";
+import { Check, X, ArrowRight, Award, RotateCw, BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -32,9 +32,23 @@ export function QuizComponent({ articleText, articleTitle, onClose }: QuizProps)
     const [showResults, setShowResults] = useState(false);
     const { toast } = useToast();
 
+    // Generate quiz when component mounts or article changes
+    useEffect(() => {
+        if (articleText && articleTitle) {
+            startQuiz();
+        }
+    }, [articleText, articleTitle]);
+
     // Generate Quiz
     const startQuiz = async () => {
         setLoading(true);
+        setStarted(false);
+        setShowResults(false);
+        setCurrentIndex(0);
+        setScore(0);
+        setSelectedOption(null);
+        setIsAnswered(false);
+
         try {
             const res = await fetch("/api/generate-quiz", {
                 method: "POST",
@@ -51,7 +65,7 @@ export function QuizComponent({ articleText, articleTitle, onClose }: QuizProps)
             toast({
                 title: "Error",
                 description: "Failed to generate quiz. Please try again.",
-                type: "error"
+                variant: "destructive"
             });
         } finally {
             setLoading(false);
@@ -105,35 +119,15 @@ export function QuizComponent({ articleText, articleTitle, onClose }: QuizProps)
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 space-y-6">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full" />
-                    <Brain className="w-16 h-16 text-indigo-500 animate-pulse relative z-10" />
-                </div>
-                <h3 className="text-xl font-semibold text-indigo-400">Analyzing Text...</h3>
-                <p className="text-muted-foreground text-center">Generating a challenging assessment for you.</p>
+            <div className="flex flex-col items-center justify-center p-20 space-y-4">
+                <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Generating Questions...</p>
             </div>
         );
     }
 
     if (!started) {
-        return (
-            <div className="flex flex-col items-center justify-center space-y-6 py-8 text-center">
-                <div className="bg-indigo-500/10 p-4 rounded-full">
-                    <Award className="w-12 h-12 text-indigo-500" />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-2xl font-bold">Ready to test your comprehension?</h2>
-                    <p className="text-muted-foreground max-w-md mx-auto">
-                        We'll generate 5 questions based on "<strong>{articleTitle}</strong>" to check your understanding of main ideas and vocabulary.
-                    </p>
-                </div>
-                <div className="flex gap-4">
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button onClick={startQuiz} className="bg-indigo-600 hover:bg-indigo-700">Start Quiz</Button>
-                </div>
-            </div>
-        );
+        return null;
     }
 
     if (showResults) {
@@ -182,7 +176,7 @@ export function QuizComponent({ articleText, articleTitle, onClose }: QuizProps)
     const currentQ = questions[currentIndex];
 
     return (
-        <div className="max-w-xl mx-auto space-y-8 py-6">
+        <div className="w-full space-y-8 py-4">
             <div className="flex justify-between items-center text-sm font-medium text-muted-foreground">
                 <span>Question {currentIndex + 1} of {questions.length}</span>
                 <span>Score: {score}</span>

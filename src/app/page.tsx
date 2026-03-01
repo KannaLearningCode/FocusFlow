@@ -8,7 +8,7 @@ import { ShadowingStation } from "@/components/modules/ShadowingStation";
 import { SentenceUpgrader } from "@/components/upgrader/SentenceUpgrader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { Placeholder } from "@/components/modules/Placeholders";
-import { Sidebar, View } from "@/components/layout/Sidebar";
+import { Topbar, View } from "@/components/layout/Topbar";
 import { VocabularyLab } from "@/components/modules/VocabularyLab";
 import { PhoneticStudio } from "@/components/modules/PhoneticStudio";
 import { ReadingLounge } from "@/components/modules/ReadingLounge";
@@ -17,35 +17,15 @@ import { cn } from "@/lib/utils";
 
 export default function Home() {
     const [activeView, setActiveView] = useState<View>("dashboard");
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-    // Optional: Persist sidebar state
-    useEffect(() => {
-        const saved = localStorage.getItem("sidebarCollapsed");
-        if (saved) setIsSidebarCollapsed(saved === "true");
-    }, []);
-
-    const toggleSidebar = () => {
-        setIsSidebarCollapsed(prev => {
-            const newState = !prev;
-            localStorage.setItem("sidebarCollapsed", String(newState));
-            return newState;
-        });
-    };
 
     return (
         <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
-            <Sidebar
+            <Topbar
                 activeView={activeView}
                 setActiveView={setActiveView}
-                isCollapsed={isSidebarCollapsed}
-                toggleSidebar={toggleSidebar}
             />
 
-            <main className={cn(
-                "p-4 md:p-8 min-h-screen transition-all duration-300",
-                isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
-            )}>
+            <main className="p-4 md:p-8 pt-20 md:pt-24 min-h-screen transition-all duration-300">
                 <AnimatePresence mode="wait">
                     {activeView === "dashboard" && (
                         <motion.div

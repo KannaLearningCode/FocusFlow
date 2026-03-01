@@ -29,25 +29,41 @@ export async function POST(req: Request) {
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         const prompt = `
-        Act as an expert English Pronunciation Coach. 
+        Act as a BRUTALLY CRITICAL English Pronunciation Coach (IELTS 9.0/Oxford Standard). 
         I am giving you:
         1. A 'target_text' the student was supposed to read.
-        2. An audio recording of the student reading it.
+        2. An audio recording that may contain TWO voices:
+           - A BACKGROUND VOICE (Perfect, mechanical, native): This is the REFERENCE audio. IGNORE IT.
+           - A FOREGROUND VOICE (Human, student): This is the USER'S recording. ONLY EVALUATE THIS VOICE.
 
         Target Text: "${targetText}"
 
         Your tasks:
-        1. Transcribe EXACTLY what the student said in the audio.
-        2. Calculate an 'accuracy_score' (0-100) by comparing the transcription with the target_text.
-        3. Provide 'prosody_feedback' focusing on word stress, rhythm, and intonation. YOU MUST PROVIDE FEEDBACK IN VIETNAMESE.
-        4. Detect if the student missed any final consonants or sounds.
+        1. Transcribe EXHIBIT A: EXACTLY what the human student said. 
+           - Capture every hesitation, stutter, and phoneme error.
+           - DO NOT transcribe the background reference voice.
+        2. Calculate 'accuracy_score' (0-100). Be EXTREMELY SEVERE.
+           - 95-100: Flawless native-level precision.
+           - 85-94: Minor vowel quality or cluster issues.
+           - 70-84: Understandable but clearly non-native. 
+           - 50-69: Heavy accent, missing endings (-s, -ed, -t), or vowel shifts.
+           - Below 50: Incomprehensible.
+           - PENALIZE HEAVILY for missing final consonants or incorrect word stress.
+        3. Calculate 'fluency_score' (0-100).
+           - Focus on: Rhythm, Liaisons (linking), and Natural Speed. 
+           - ANY robotic/choppy pausing results in a score below 50.
+        4. Provide 'prosody_feedback' in VIETNAMESE.
+           - Be blunt and honest about the student's weaknesses.
+           - Focus on: Intonation, Sentence Stress, and Vowel Clarity.
+        5. List 'detected_mistakes' (words where the student failed to meet high standards).
 
         Return ONLY a JSON object:
         {
             "user_transcription": "...",
             "accuracy_score": number,
-            "prosody_feedback": "Detailed feedback string (IN VIETNAMESE)",
-            "detected_mistakes": ["list", "of", "words", "mispronounced"]
+            "fluency_score": number,
+            "prosody_feedback": "...",
+            "detected_mistakes": ["..."]
         }
         `;
 
@@ -80,7 +96,9 @@ export async function POST(req: Request) {
             targetText,
             userTranscription: analysis.user_transcription,
             accuracyScore: analysis.accuracy_score,
+            fluencyScore: analysis.fluency_score,
             prosodyFeedback: analysis.prosody_feedback,
+            detectedMistakes: analysis.detected_mistakes,
             cefrLevel: level,
         });
 

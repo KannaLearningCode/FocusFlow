@@ -40,8 +40,8 @@ export async function POST(req: Request) {
                 "ipa": "/.../",
                 "example": "sentence...",
                 "meaningVN": "Vietnamese meaning...",
-                "collocations": ["col1", "col2"],
-                "verbCollocations": ["vcol1", "vcol2"],
+                "collocations": ["limit to max 3 items"],
+                "verbCollocations": ["limit to max 3 items"],
                 "synonyms": ["syn1", "syn2"],
                 "antonyms": ["ant1", "ant2"]
             }
@@ -59,8 +59,8 @@ export async function POST(req: Request) {
                 "ipa": "/.../",
                 "example": "sentence...",
                 "meaningVN": "Vietnamese meaning...",
-                "collocations": ["col1", "col2"],
-                "verbCollocations": ["vcol1", "vcol2"],
+                "collocations": ["limit to max 3 items"],
+                "verbCollocations": ["limit to max 3 items"],
                 "synonyms": ["syn1", "syn2"],
                 "antonyms": ["ant1", "ant2"]
             }

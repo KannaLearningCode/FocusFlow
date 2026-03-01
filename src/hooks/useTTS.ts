@@ -11,7 +11,21 @@ export function useTTS() {
 
             const loadVoices = () => {
                 const available = window.speechSynthesis.getVoices();
-                setVoices(available);
+                // Keep only English (US) voices that sound natural or standard
+                const usVoices = available.filter(v =>
+                    v.lang.includes("en-US") ||
+                    v.name.includes("United States") ||
+                    v.name.includes("US")
+                );
+
+                // Sort to put Michelle first if she exists
+                usVoices.sort((a, b) => {
+                    if (a.name.includes("Michelle")) return -1;
+                    if (b.name.includes("Michelle")) return 1;
+                    return 0;
+                });
+
+                setVoices(usVoices.length > 0 ? usVoices : available);
             };
 
             loadVoices();
@@ -28,7 +42,13 @@ export function useTTS() {
         localStorage.setItem("preferredVoice", name);
     }, []);
 
-    const speak = useCallback((text: string, options?: { lang?: "GB" | "US"; rate?: number; voiceName?: string }) => {
+    const speak = useCallback((text: string, options?: {
+        lang?: "GB" | "US";
+        rate?: number;
+        voiceName?: string;
+        onBoundary?: (charIndex: number, word: string) => void;
+        onEnd?: () => void;
+    }) => {
         if (!supported) return;
 
         window.speechSynthesis.cancel();
@@ -36,9 +56,6 @@ export function useTTS() {
         const utterance = new SpeechSynthesisUtterance(text);
         const lang = options?.lang || "GB";
 
-        // 1. Try specified voice if provided (for previews)
-        // 2. Try preferred voice from settings
-        // 3. Fallback to default logic
         let selectedVoice = options?.voiceName
             ? voices.find(v => v.name === options.voiceName)
             : voices.find(v => v.name === preferredVoiceName);
@@ -46,28 +63,44 @@ export function useTTS() {
         if (!selectedVoice) {
             selectedVoice = voices.find(v => {
                 if (lang === "GB") {
-                    return (v.name.includes("Great Britain") || v.name.includes("UK") || v.name.includes("Google UK English Female"));
+                    return (v.name.includes("Great Britain") || v.name.includes("UK"));
                 } else {
-                    return (v.name.includes("United States") || v.name.includes("US") || v.name.includes("Google US English"));
+                    return (v.name.includes("United States") || v.name.includes("US"));
                 }
             });
         }
 
-        if (selectedVoice) {
-            utterance.voice = selectedVoice;
-        }
-
+        if (selectedVoice) utterance.voice = selectedVoice;
         utterance.rate = options?.rate || 0.9;
         utterance.pitch = 1.0;
+
+        if (options?.onBoundary) {
+            utterance.onboundary = (event) => {
+                if (event.name === 'word') {
+                    const word = text.slice(event.charIndex).split(/\s+/)[0];
+                    options.onBoundary!(event.charIndex, word);
+                }
+            };
+        }
+
+        if (options?.onEnd) {
+            utterance.onend = options.onEnd;
+        }
 
         window.speechSynthesis.speak(utterance);
     }, [voices, supported, preferredVoiceName]);
 
     const cancel = useCallback(() => {
-        if (supported) {
-            window.speechSynthesis.cancel();
-        }
+        if (supported) window.speechSynthesis.cancel();
     }, [supported]);
 
-    return { speak, cancel, supported, voices, setVoice, preferredVoiceName };
+    const pause = useCallback(() => {
+        if (supported) window.speechSynthesis.pause();
+    }, [supported]);
+
+    const resume = useCallback(() => {
+        if (supported) window.speechSynthesis.resume();
+    }, [supported]);
+
+    return { speak, cancel, pause, resume, supported, voices, setVoice, preferredVoiceName };
 }

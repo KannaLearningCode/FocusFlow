@@ -11,49 +11,7 @@ export async function GET() {
         const session = await getServerSession(authOptions);
         const userId = session?.user?.id || "default";
 
-        let words = await Vocabulary.find({ userId }).sort({ createdAt: -1 });
-
-        // Auto-seed if empty for this specific user
-        if (words.length === 0) {
-            const seedWords = [
-                {
-                    userId,
-                    word: "Analytical",
-                    wordClass: "adjective",
-                    definition: "Relating to or using analysis or logical reasoning.",
-                    ipa: "/ˌan.əˈlɪt.ɪ.kəl/",
-                    collocations: ["analytical skills", "analytical approach"],
-                    example: "She has a very analytical mind.",
-                    srsLevel: 0,
-                    box: 0
-                },
-                {
-                    userId,
-                    word: "Substantial",
-                    wordClass: "adjective",
-                    definition: "Of considerable importance, size, or worth.",
-                    ipa: "/səbˈstan.ʃəl/",
-                    collocations: ["substantial amount", "substantial difference"],
-                    example: "A substantial amount of money.",
-                    srsLevel: 0,
-                    box: 0
-                },
-                {
-                    userId,
-                    word: "Pragmatic",
-                    wordClass: "adjective",
-                    definition: "Dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations.",
-                    ipa: "/pragˈmat.ɪk/",
-                    collocations: ["pragmatic approach", "pragmatic solution"],
-                    example: "We need a pragmatic solution to this problem.",
-                    srsLevel: 0,
-                    box: 0
-                }
-            ];
-            await Vocabulary.insertMany(seedWords);
-            words = await Vocabulary.find({ userId }).sort({ createdAt: -1 }); // Re-fetch
-        }
-
+        const words = await Vocabulary.find({ userId }).sort({ createdAt: -1 });
         return NextResponse.json(words);
     } catch (e: any) {
         console.error("Fetch Vocab Error:", e);

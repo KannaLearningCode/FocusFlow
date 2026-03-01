@@ -151,9 +151,9 @@ export function VocabularyLab() {
                                     </div>
 
                                     {selectedWord.meaningVN && (
-                                        <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
-                                            <div className="text-xs font-bold text-blue-400 uppercase mb-1">Vietnamese Meaning</div>
-                                            <p className="font-medium text-lg text-blue-100">{selectedWord.meaningVN}</p>
+                                        <div className="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20 shadow-sm">
+                                            <div className="text-xs font-bold text-emerald-400 uppercase mb-1">Vietnamese Meaning</div>
+                                            <p className="font-bold text-xl text-emerald-400">{selectedWord.meaningVN}</p>
                                         </div>
                                     )}
 
@@ -294,7 +294,9 @@ export function VocabularyLab() {
                                                         )}
                                                         {item.type === 'word' && item.ipa && <span className="text-xs font-mono text-amber-500/80">{item.ipa}</span>}
                                                     </div>
-                                                    <div className="text-xs text-muted-foreground truncate max-w-[200px] md:max-w-md">{item.meaningVN || item.definition}</div>
+                                                    <div className="text-xs text-emerald-500/80 font-medium truncate max-w-[200px] md:max-w-md">
+                                                        {item.meaningVN ? `🇻🇳 ${item.meaningVN}` : item.definition}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3">
