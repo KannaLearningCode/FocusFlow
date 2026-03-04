@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import UserProgress from "@/models/UserProgress";
 import Vocabulary from "@/models/Vocabulary";
 import UpgradedSentence from "@/models/UpgradedSentence";

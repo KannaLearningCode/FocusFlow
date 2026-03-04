@@ -247,14 +247,7 @@ export function SentenceUpgrader() {
         <div className="w-full max-w-4xl mx-auto space-y-8 relative">
             <header className="mb-8 flex items-center justify-between">
                 <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium uppercase tracking-wider border border-blue-500/20 mb-4">
-                        <Sparkles className="w-3 h-3" />
-                        AI Powered • {level} Target
-                    </div>
                     <h2 className="text-4xl font-bold tracking-tight mb-3">Sentence Upgrader</h2>
-                    <p className="text-lg text-muted-foreground">
-                        Refine your tone and syntax instantly using Cloud STT.
-                    </p>
                 </div>
                 <Button variant="outline" onClick={() => setShowHistory(true)}>
                     <BookOpen className="w-4 h-4 mr-2" /> History

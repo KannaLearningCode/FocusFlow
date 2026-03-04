@@ -269,8 +269,7 @@ export function ShadowingStation() {
             <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2 scrollbar-thin">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Shadowing Station 2.0</h1>
-                        <p className="text-muted-foreground">Master native pronunciation with brutally honest AI feedback.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Shadowing Station</h1>
                     </div>
 
                     <Dialog open={showHistory} onOpenChange={setShowHistory}>

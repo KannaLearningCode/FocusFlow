@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import ShadowingSession from "@/models/ShadowingSession";
 import UserSettings from "@/models/UserSettings";
 import { getServerSession } from "next-auth/next";

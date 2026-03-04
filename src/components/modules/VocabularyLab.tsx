@@ -5,7 +5,7 @@ import { useVocabulary, VocabularyItem } from "@/hooks/useVocabulary";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, X, RotateCw, Layers, Sparkles, Search, Volume2, Trash } from "lucide-react";
+import { Check, X, RotateCw, Layers, Sparkles, Search, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTTS } from "@/hooks/useTTS";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -88,7 +88,6 @@ export function VocabularyLab() {
             <header className="flex items-center justify-between">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight mb-2">Vocabulary Lab</h2>
-                    <p className="text-muted-foreground">Master academic lexicon with Spaced Repetition.</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <Dialog open={isDiscoveryOpen} onOpenChange={setIsDiscoveryOpen}>
@@ -159,7 +158,7 @@ export function VocabularyLab() {
 
                                     <div className="bg-secondary/20 p-4 rounded-xl border border-border/50">
                                         <div className="text-xs font-bold text-muted-foreground uppercase mb-1">Example</div>
-                                        <p className="italic text-muted-foreground">"{selectedWord.example}"</p>
+                                        <p className="italic text-muted-foreground">&quot;{selectedWord.example}&quot;</p>
                                     </div>
                                 </div>
 
@@ -399,7 +398,7 @@ export function VocabularyLab() {
                                     )}
 
                                     <div className="text-sm italic text-muted-foreground bg-background/50 p-4 rounded-lg border border-border/50 w-full">
-                                        "{currentCard.example}"
+                                        &quot;{currentCard.example}&quot;
                                     </div>
                                 </div>
                             </motion.div>

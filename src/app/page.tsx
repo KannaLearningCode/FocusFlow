@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { DictationLab } from "@/components/modules/DictationLab";
 import { VoiceSettings } from "@/components/modules/VoiceSettings";
 import { ShadowingStation } from "@/components/modules/ShadowingStation";
-import { SentenceUpgrader } from "@/components/upgrader/SentenceUpgrader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
-import { Placeholder } from "@/components/modules/Placeholders";
 import { Topbar, View } from "@/components/layout/Topbar";
 import { VocabularyLab } from "@/components/modules/VocabularyLab";
 import { PhoneticStudio } from "@/components/modules/PhoneticStudio";
 import { ReadingLounge } from "@/components/modules/ReadingLounge";
 import { WritingGym } from "@/components/modules/WritingGym";
-import { cn } from "@/lib/utils";
 
 export default function Home() {
     const [activeView, setActiveView] = useState<View>("dashboard");
@@ -76,19 +73,6 @@ export default function Home() {
                             className="w-full max-w-5xl mx-auto"
                         >
                             <ShadowingStation />
-                        </motion.div>
-                    )}
-
-                    {activeView === "upgrader" && (
-                        <motion.div
-                            key="upgrader"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                            className="w-full max-w-4xl mx-auto"
-                        >
-                            <SentenceUpgrader />
                         </motion.div>
                     )}
 

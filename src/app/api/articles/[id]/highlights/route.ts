@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Article from "@/models/Article";
 import Vocabulary from "@/models/Vocabulary";
 import { GoogleGenerativeAI } from "@google/generative-ai";

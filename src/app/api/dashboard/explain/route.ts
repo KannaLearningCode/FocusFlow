@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { getCEFRPrompt } from "@/lib/cefr";
-import connectDB from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import ExplainerHistory from "@/models/ExplainerHistory";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";

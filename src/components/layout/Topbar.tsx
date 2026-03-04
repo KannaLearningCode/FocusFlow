@@ -1,13 +1,13 @@
 "use client";
 
-import { LayoutDashboard, Mic, BookOpen, Layers, Podcast, Book, Sparkles, PenTool, Headphones, Settings2, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Mic, Layers, Podcast, Book, Sparkles, PenTool, Headphones, Settings2, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-export type View = "dashboard" | "shadowing" | "upgrader" | "vocabulary" | "phonetic" | "reading" | "writing" | "dictation" | "settings";
+export type View = "dashboard" | "shadowing" | "vocabulary" | "phonetic" | "reading" | "writing" | "dictation" | "settings";
 
 interface TopbarProps {
     activeView: View;
@@ -22,7 +22,6 @@ export function Topbar({ activeView, setActiveView }: TopbarProps) {
         { id: "reading", icon: Book, label: "Reading" },
         { id: "writing", icon: PenTool, label: "Writing" },
         { id: "shadowing", icon: Mic, label: "Shadowing" },
-        { id: "upgrader", icon: BookOpen, label: "Upgrader" },
         { id: "vocabulary", icon: Layers, label: "Vocab Lab" },
         { id: "phonetic", icon: Podcast, label: "Phonetics" },
         { id: "dictation", icon: Headphones, label: "Dictation" },

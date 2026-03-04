@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import connectDB from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import DictationSession from "@/models/DictationSession";
 import UserSettings from "@/models/UserSettings";
 import { getServerSession } from "next-auth/next";

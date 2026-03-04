@@ -2,19 +2,12 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-/**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
- */
 interface MongooseCache {
     conn: mongoose.Connection | null;
     promise: Promise<mongoose.Connection> | null;
 }
 
-// Enable loose casting for the global object to avoid TS errors
 declare global {
-    // eslint-disable-next-line no-var
     var mongoose: MongooseCache;
 }
 
@@ -24,11 +17,10 @@ if (!cached) {
     cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function connectDB() {
+// CHỈ DÙNG NAMED EXPORT Ở ĐÂY
+export async function connectDB() {
     if (!MONGODB_URI) {
-        throw new Error(
-            "Please define the MONGODB_URI environment variable inside .env.local"
-        );
+        throw new Error("Please define MONGODB_URI inside .env.local");
     }
 
     if (cached.conn) {
@@ -36,13 +28,14 @@ async function connectDB() {
     }
 
     if (!cached.promise) {
-        const opts = {
-            bufferCommands: false,
-        };
+        const opts = { bufferCommands: false };
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            console.log("MongoDB Connected Successfully");
-            return mongoose.connection;
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
+            // Logic logging theo kế hoạch của bạn
+            const isProd = MONGODB_URI.includes("mongodb+srv");
+            console.log(`🚀 FocusFlow connected to ${isProd ? "Remote (Atlas)" : "Local"} Database`);
+
+            return mongooseInstance.connection;
         });
     }
 
@@ -55,5 +48,3 @@ async function connectDB() {
 
     return cached.conn;
 }
-
-export default connectDB;

@@ -90,7 +90,7 @@ export function ConversationSimulator() {
                         </div>
                         <div>
                             <h3 className="font-bold text-sm">{isIELTSMode ? "IELTS Examiner" : "Linguistic Partner"}</h3>
-                            <p className="text-xs text-muted-foreground">{isIELTSMode ? "Formal Speaking Test" : "AI Conversation (Cloud STT)"}</p>
+                            <p className="text-xs text-muted-foreground">{isIELTSMode ? "Formal Speaking Test" : ""}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
